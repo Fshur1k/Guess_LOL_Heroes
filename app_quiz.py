@@ -8,6 +8,95 @@ st.set_page_config(page_title="LoL Champion Quiz & Study", page_icon="⚔️", l
 
 LEADERBOARD_FILE = "leaderboard.json"
 
+# --- БАЗА ПОЗИЦІЙ ТА ФЛЕКС-ПИКІВ ---
+POSITION_OVERRIDES = {
+    # Лісники (Jungle)
+    "LeeSin": {"primary": "Jungle", "flex": []},
+    "MasterYi": {"primary": "Jungle", "flex": []},
+    "Warwick": {"primary": "Jungle", "flex": ["Top"]},
+    "Khazix": {"primary": "Jungle", "flex": []},
+    "Graves": {"primary": "Jungle", "flex": ["Top"]},
+    "Vi": {"primary": "Jungle", "flex": []},
+    "JarvanIV": {"primary": "Jungle", "flex": []},
+    "Shaco": {"primary": "Jungle", "flex": ["Support"]},
+    "Hecarim": {"primary": "Jungle", "flex": []},
+    "Evelynn": {"primary": "Jungle", "flex": []},
+    "Kayn": {"primary": "Jungle", "flex": []},
+    "Viego": {"primary": "Jungle", "flex": ["Mid"]},
+    "Nidalee": {"primary": "Jungle", "flex": []},
+    "Elise": {"primary": "Jungle", "flex": []},
+    "Kindred": {"primary": "Jungle", "flex": []},
+    "Fiddlesticks": {"primary": "Jungle", "flex": []},
+    "Rengar": {"primary": "Jungle", "flex": ["Top"]},
+    "Nocturne": {"primary": "Jungle", "flex": []},
+    "Amumu": {"primary": "Jungle", "flex": ["Support"]},
+    "Nunu": {"primary": "Jungle", "flex": []},
+    "Zac": {"primary": "Jungle", "flex": ["Top", "Support"]},
+    "Rammus": {"primary": "Jungle", "flex": []},
+    "Volibear": {"primary": "Jungle", "flex": ["Top"]},
+    "Udyr": {"primary": "Jungle", "flex": ["Top"]},
+    "Belveth": {"primary": "Jungle", "flex": []},
+    "Briar": {"primary": "Jungle", "flex": []},
+    "Ivern": {"primary": "Jungle", "flex": []},
+    
+    # Флекс-герої та специфічні позиції
+    "Swain": {"primary": "Support", "flex": ["Mid", "Bot (ADC)"]},
+    "Lux": {"primary": "Support", "flex": ["Mid"]},
+    "Morgana": {"primary": "Support", "flex": ["Mid", "Jungle"]},
+    "Yasuo": {"primary": "Mid", "flex": ["Top", "Bot (ADC)"]},
+    "Yone": {"primary": "Mid", "flex": ["Top"]},
+    "Pantheon": {"primary": "Support", "flex": ["Top", "Mid"]},
+    "Sett": {"primary": "Top", "flex": ["Support", "Mid"]},
+    "Jayce": {"primary": "Top", "flex": ["Mid"]},
+    "Gragas": {"primary": "Top", "flex": ["Jungle", "Mid"]},
+    "TahmKench": {"primary": "Support", "flex": ["Top"]},
+    "Malphite": {"primary": "Top", "flex": ["Mid", "Support"]},
+    "Karma": {"primary": "Support", "flex": ["Mid", "Top"]},
+    "Seraphine": {"primary": "Support", "flex": ["Bot (ADC)", "Mid"]},
+    "Senna": {"primary": "Support", "flex": ["Bot (ADC)"]},
+    "Tristana": {"primary": "Bot (ADC)", "flex": ["Mid"]},
+    "Lucian": {"primary": "Bot (ADC)", "flex": ["Mid"]},
+    "Vayne": {"primary": "Bot (ADC)", "flex": ["Top"]},
+    "Varus": {"primary": "Bot (ADC)", "flex": ["Mid"]},
+    "Kaisa": {"primary": "Bot (ADC)", "flex": ["Mid"]},
+    "Brand": {"primary": "Support", "flex": ["Jungle", "Mid"]},
+    "Zyra": {"primary": "Support", "flex": ["Jungle"]},
+    "Velkoz": {"primary": "Support", "flex": ["Mid"]},
+    "Xerath": {"primary": "Support", "flex": ["Mid"]},
+    "Pyke": {"primary": "Support", "flex": ["Mid"]},
+    "Nautilus": {"primary": "Support", "flex": []},
+    "Thresh": {"primary": "Support", "flex": []},
+    "Blitzcrank": {"primary": "Support", "flex": []},
+    "Leona": {"primary": "Support", "flex": []},
+    "Lulu": {"primary": "Support", "flex": []},
+    "Nami": {"primary": "Support", "flex": []},
+    "Janna": {"primary": "Support", "flex": []},
+    "Yuumi": {"primary": "Support", "flex": []},
+    "Sona": {"primary": "Support", "flex": []},
+    "Soraka": {"primary": "Support", "flex": []},
+    "Milio": {"primary": "Support", "flex": []},
+    "Renata": {"primary": "Support", "flex": []},
+    "Rakan": {"primary": "Support", "flex": []},
+}
+
+def get_champion_positions(champ_id, tags):
+    if champ_id in POSITION_OVERRIDES:
+        return POSITION_OVERRIDES[champ_id]["primary"], POSITION_OVERRIDES[champ_id]["flex"]
+    
+    if "Marksman" in tags:
+        return "Bot (ADC)", []
+    elif "Support" in tags:
+        return "Support", ["Mid"] if "Mage" in tags else []
+    elif "Assassin" in tags:
+        return "Mid", ["Jungle"]
+    elif "Mage" in tags:
+        return "Mid", ["Support"]
+    elif "Fighter" in tags:
+        return "Top", ["Jungle"]
+    elif "Tank" in tags:
+        return "Top", ["Support"]
+    return "Mid", []
+
 # --- ТЕКСТИ ІНТЕРФЕЙСУ ---
 TEXTS = {
     "uk": {
@@ -39,7 +128,9 @@ TEXTS = {
         "next_card": "Наступна картка ➡️",
         "prev_card": "⬅️ Попередня картка",
         "random_card": "🎲 Випадкова картка",
-        "title_label": "Титул",
+        "primary_pos": "Основна позиція",
+        "flex_pos": "Flex / Інші варіанти",
+        "no_flex": "Спеціалізований пик (немає)",
         "tags_label": "Роль",
     },
     "en": {
@@ -71,8 +162,10 @@ TEXTS = {
         "next_card": "Next Card ➡️",
         "prev_card": "⬅️ Previous Card",
         "random_card": "🎲 Random Card",
-        "title_label": "Title",
-        "tags_label": "Role",
+        "primary_pos": "Primary Position",
+        "flex_pos": "Flex / Other Positions",
+        "no_flex": "Specialized Pick (None)",
+        "tags_label": "Class",
     },
 }
 
@@ -114,12 +207,15 @@ def load_champions(lang):
         data = res.json()["data"]
         champions_list = []
         for k, v in data.items():
+            tags = v.get("tags", [])
+            primary_pos, flex_pos = get_champion_positions(k, tags)
             champions_list.append({
                 "id": k,
                 "name": v["name"],
                 "title": v.get("title", ""),
-                "tags": v.get("tags", []),
-                "blurb": v.get("blurb", "")
+                "tags": tags,
+                "primary_pos": primary_pos,
+                "flex_pos": flex_pos
             })
         return champions_list, latest_version
     except Exception as e:
@@ -129,7 +225,6 @@ def load_champions(lang):
 # --- АЛГОРИТМ РОЗУМНОГО ПІДБОРУ ВАРІАНТІВ ---
 def generate_round_options(champions_pool):
     correct = random.choice(champions_pool)
-    # Шукаємо чемпіонів зі схожою роллю (Mage, Fighter, Tank тощо)
     same_tag_champs = [
         c for c in champions_pool 
         if c["id"] != correct["id"] and any(t in correct.get("tags", []) for t in c.get("tags", []))
@@ -320,7 +415,6 @@ with tab_study:
     if "card_flipped" not in st.session_state:
         st.session_state.card_flipped = False
 
-    # Фільтрація за ролями
     all_tags = sorted(list({tag for c in champions for tag in c.get("tags", [])}))
     selected_role = st.selectbox(t["filter_role"], [t["all_roles"]] + all_tags)
 
@@ -334,27 +428,25 @@ with tab_study:
         st.session_state.card_idx %= len(filtered_champs)
         champ = filtered_champs[st.session_state.card_idx]
 
-        # Великий сплеш-арт для картки Quizlet
         splash_url = f"https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{champ['id']}_0.jpg"
         
         st.markdown(f"**Картка {st.session_state.card_idx + 1} з {len(filtered_champs)}**")
-        
-        # Відображення картинки картки
         st.image(splash_url, use_container_width=True)
 
-        # Перевертання картки
         if st.button(t["hide_card"] if st.session_state.card_flipped else t["show_card"], use_container_width=True):
             st.session_state.card_flipped = not st.session_state.card_flipped
             st.rerun()
 
         if st.session_state.card_flipped:
             st.info(f"### {champ['name']}\n*{champ['title'].capitalize()}*")
+            st.write(f"**{t['primary_pos']}:** `{champ['primary_pos']}`")
+            
+            flex_text = ", ".join(champ["flex_pos"]) if champ["flex_pos"] else t["no_flex"]
+            st.write(f"**{t['flex_pos']}:** {flex_text}")
             st.write(f"**{t['tags_label']}:** {', '.join(champ.get('tags', []))}")
-            st.caption(champ.get("blurb", ""))
 
         st.divider()
 
-        # Навігація карток
         n_col1, n_col2, n_col3 = st.columns(3)
         with n_col1:
             if st.button(t["prev_card"], use_container_width=True):
